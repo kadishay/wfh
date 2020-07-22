@@ -1,1 +1,11 @@
 https://www.freecodecamp.org/news/create-a-react-frontend-a-node-express-backend-and-connect-them-together-c5798926047c/
+
+https://github.com/kadishay/wfh
+
+https://github.com/settings/tokens
+
+https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow
+
+https://developer.github.com/v3/repos/statistics/
+
+https://uber.github.io/react-vis/examples/showcases/plots

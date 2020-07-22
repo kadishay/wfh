@@ -3,13 +3,39 @@ var router = express.Router();
 const https = require('https');
 var secret = require('../../secret');
 
+router.get("/repos", function(req, res, next) {
+  const options = {
+    headers: { 'User-Agent': 'Mozilla/5.0', 'Authorization': 'token '+secret.token },
+    protocol: 'https:',
+    hostname: 'api.github.com',
+    path: '/orgs/guestyorg/repos'
+  };
+  https.get(options, (resp) => {
+    let data = '';
+  
+    resp.on('data', (chunk) => {
+      data += chunk;
+    });
+  
+    resp.on('end', () => {
+      data = JSON.parse(data);
+
+      res.send(data);
+    });
+  
+  }).on("error", (err) => {
+    console.log("Error: " + err.message);
+  });
+  
+});
+
 router.get("/hourly", function(req, res, next) {
   const options = {
     headers: { 'User-Agent': 'Mozilla/5.0', 'Authorization': 'token '+secret.token },
     protocol: 'https:',
     hostname: 'api.github.com',
     //path: '/orgs/guestyorg/repos'
-    path: '/repos/guestyorg/legacy-calculator/stats/punch_card'
+    path: '/repos/guestyorg/mailer/stats/punch_card'
   };
   https.get(options, (resp) => {
     let data = '';
@@ -27,8 +53,6 @@ router.get("/hourly", function(req, res, next) {
       const hours = new Array(24);
       hours.fill(0);
       data = JSON.parse(data);
-
-      console.log(data);
 
       data.forEach((day)=>{
         hours[day[1]] += day[2];
@@ -48,7 +72,8 @@ router.get("/daily", function(req, res, next) {
     headers: { 'User-Agent': 'Mozilla/5.0', 'Authorization': 'token '+secret.token },
     protocol: 'https:',
     hostname: 'api.github.com',
-    path: '/repos/guestyorg/legacy-calculator/stats/commit_activity'
+    //path: '/repos/guestyorg/legacy-calculator/stats/commit_activity'
+    path: '/repos/guestyorg/mailer/stats/commit_activity'
   };
   https.get(options, (resp) => {
     let data = '';
@@ -63,16 +88,54 @@ router.get("/daily", function(req, res, next) {
       days.fill(0);
       weeks.fill(0);
       data = JSON.parse(data);
-      data.forEach((week,i)=>{
-        weeks[i] += week.total;
-        week.days.forEach((day,j)=>{
-          days[j] += day;
+      console.log(data);
+      try {
+        data.forEach((week,i)=>{
+          weeks[i] += week.total;
+          week.days.forEach((day,j)=>{
+            days[j] += day;
+          });
         });
-      });
+      }
+      catch(err) {
+        console.log(err);
+        console.log(data);
+      }
+ 
 
       const result = {days,weeks}
 
       res.send(result);
+    });
+  
+  }).on("error", (err) => {
+    console.log("Error: " + err.message);
+  });
+
+});
+
+router.get("/weekly", function(req, res, next) {
+  const options = {
+    headers: { 'User-Agent': 'Mozilla/5.0', 'Authorization': 'token '+secret.token },
+    protocol: 'https:',
+    hostname: 'api.github.com',
+    //path: '/repos/guestyorg/legacy-calculator/stats/commit_activity'
+    path: '/repos/guestyorg/mailer/stats/participation'
+  };
+  https.get(options, (resp) => {
+    let data = '';
+  
+    resp.on('data', (chunk) => {
+      data += chunk;
+    });
+  
+    resp.on('end', () => {
+      const weeks = new Array(52);
+      weeks.fill(0);
+      data = JSON.parse(data);
+      console.log(data);
+
+      res.send(data);
     });
   
   }).on("error", (err) => {
