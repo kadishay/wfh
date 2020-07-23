@@ -54,6 +54,7 @@ function App() {
   const [hours, setHours] = useState([]);
   const [days, setDays] = useState([]);
   const [weeks, setWeeks] = useState([]);
+  const [weeksAVG, setWeeksAVG] = useState([]);
   const [jira, setJira] = useState({});
   const [jiraAVG, setJiraAVG] = useState({});
 
@@ -84,6 +85,30 @@ function App() {
           y:num
         }));
         setWeeks(weeks_chart);
+
+        var weeks_avg = [];
+        for (var i=weeks_chart.length-1; i>=0; i--) {
+          weeks_avg[i] = {
+            x: weeks_chart[i].x,
+            y: weeks_chart[i].y
+          };
+
+          if (weeks_chart[i-5]) {
+            weeks_avg[i].y = Math.round((weeks_chart[i].y + weeks_chart[i-1].y + weeks_chart[i-2].y + weeks_chart[i-3].y + weeks_chart[i-4].y + weeks_chart[i-5].y)/6);
+          } else if (weeks_chart[i-4]) {
+            weeks_avg[i].y = Math.round((weeks_chart[i].y + weeks_chart[i-1].y + weeks_chart[i-2].y + weeks_chart[i-3].y + weeks_chart[i-4].y)/5);
+          } else if (weeks_chart[i-3]) {
+            weeks_avg[i].y = Math.round((weeks_chart[i].y + weeks_chart[i-1].y + weeks_chart[i-2].y + weeks_chart[i-3].y)/4);
+          } else if (weeks_chart[i-2]) {
+            weeks_avg[i].y = Math.round((weeks_chart[i].y + weeks_chart[i-1].y + weeks_chart[i-2].y)/3);
+          } else if (weeks_chart[i-1]) {
+            weeks_avg[i].y = Math.round((weeks_chart[i].y + weeks_chart[i-1].y)/2);
+          } else {
+            weeks_avg[i].y = weeks_chart[i].y;
+          }
+        }
+
+        setWeeksAVG(weeks_avg);
       });
   },[]);
 
@@ -142,8 +167,6 @@ function App() {
           });
         });
 
-        console.log(month_hours_avg_chart);
-
         setJiraAVG(month_hours_avg_chart);
       });
   },[]);
@@ -160,8 +183,6 @@ function App() {
   hours.forEach(element => {
     sum_hours+=element.y;
   }); 
-
-  console.log(jiraAVG);
 
   return (
     <div className="App">
@@ -226,13 +247,16 @@ function App() {
           <YAxis />
         </XYPlot>
 
-        <h2>Git commits by week 0 is current - going back 1 year - 52 weeks</h2>
+        <h2>Git commits by week 0 is current - going back 1 year - 52 weeks - with 6m running average </h2>
         <XYPlot
           width={800}
           height={600}>
           <HorizontalGridLines />
           <LineSeries
             data={weeks}/>
+          <LineSeries
+            curve={'curveMonotoneX'}
+            data={weeksAVG}/>
           <XAxis />
           <YAxis />
         </XYPlot>
