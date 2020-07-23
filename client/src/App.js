@@ -55,6 +55,7 @@ function App() {
   const [days, setDays] = useState([]);
   const [weeks, setWeeks] = useState([]);
   const [jira, setJira] = useState({});
+  const [jiraAVG, setJiraAVG] = useState({});
 
   useEffect(() => {
     fetch("http://localhost:9000/data/hourly")
@@ -101,6 +102,49 @@ function App() {
         });
 
         setJira(month_hours_chart);
+
+        var month_hours_avg_chart = {
+          before: [],
+          after: []
+        };
+        var dataPrepBefore = {};
+        var dataPrepAfter = {};
+        Object.keys(result).forEach((key) => {
+          if (["2019-10","2019-09","2019-08"].includes(key)) {
+            result[key].forEach((num,i)=>{
+              if (!dataPrepBefore[i]) {
+                dataPrepBefore[i] = 0;
+              }
+              dataPrepBefore[i] += num;
+            });
+          }
+          if (["2020-06","2020-05","2020-04"].includes(key)) {
+            result[key].forEach((num,i)=>{
+              if (!dataPrepAfter[i]) {
+                dataPrepAfter[i] = 0;
+              }
+              dataPrepAfter[i] += num;
+            });
+          }
+        });
+
+        Object.keys(dataPrepBefore).forEach((key)=>{
+          month_hours_avg_chart.before.push({
+            x: parseInt(key),
+            y: Math.round(dataPrepBefore[key]/3)
+          });
+        });
+
+        Object.keys(dataPrepAfter).forEach((key)=>{
+          month_hours_avg_chart.after.push({
+            x: parseInt(key),
+            y: Math.round(dataPrepAfter[key]/3)
+          });
+        });
+
+        console.log(month_hours_avg_chart);
+
+        setJiraAVG(month_hours_avg_chart);
       });
   },[]);
   
@@ -115,26 +159,50 @@ function App() {
   });
   hours.forEach(element => {
     sum_hours+=element.y;
-  });
-  console.log('hours: ' + sum_hours);    
-  console.log('days: ' + sum_days);    
-  console.log('weeks: ' + sum_weeks);    
+  }); 
+
+  console.log(jiraAVG);
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>Engineering Engagement</h1>
 
-        <h2>Jira Per Hour</h2>
+        <h2>Jira Last 3M (Blue) VS. 2019 3 Month (Red)</h2>
+        <XYPlot width={800} height={600}>
+          <HorizontalGridLines />
+          <XAxis />
+          <YAxis />
+              <LineMarkSeries
+                style={{
+                  strokeWidth: '3px'
+                }}
+                curve={'curveMonotoneX'}
+                lineStyle={{stroke: 'red'}}
+                /*markStyle={{stroke: 'blue'}}*/
+                data={jiraAVG.before}
+                />
+                <LineMarkSeries
+                style={{
+                  strokeWidth: '3px'
+                }}
+                curve={'curveMonotoneX'}
+                lineStyle={{stroke: 'blue'}}
+                /*markStyle={{stroke: 'blue'}}*/
+                data={jiraAVG.after}
+                />
+          
+        </XYPlot>
+
+        <h2>Jira Per Hour last 12M</h2>
         <XYPlot width={800} height={600}>
           <HorizontalGridLines />
           <XAxis />
           <YAxis />
           {Object.keys(jira).map(month=>{
-            console.log(month);
-
             return (
               <LineMarkSeries
+                key={month}
                 style={{
                   strokeWidth: '3px'
                 }}
@@ -147,7 +215,7 @@ function App() {
           })}
         </XYPlot>
 
-        <h2>Commits by hour of the day</h2>
+        <h2>Git commits by hour of the day - last 20k commits</h2>
         <XYPlot
           width={800}
           height={600}>
@@ -158,7 +226,7 @@ function App() {
           <YAxis />
         </XYPlot>
 
-        <h2>Commits by week 0 is current - going back 1 year - 52 weeks</h2>
+        <h2>Git commits by week 0 is current - going back 1 year - 52 weeks</h2>
         <XYPlot
           width={800}
           height={600}>
@@ -169,7 +237,7 @@ function App() {
           <YAxis />
         </XYPlot>
 
-        <h2>Commits by day of the week</h2>
+        <h2>Git commits by day of the week</h2>
         <XYPlot
           width={300}
           height={300}>
