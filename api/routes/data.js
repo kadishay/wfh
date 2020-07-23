@@ -1,7 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const https = require('https');
+const http = require('http');
 var secret = require('../../secret');
+var jira = require('../jira.json');
 
 router.get("/repos", function(req, res, next) {
   const options = {
@@ -140,6 +142,75 @@ router.get("/weekly", function(req, res, next) {
   });
 
 });
+
+/*
+
+{
+  "expand": "operations,versionedRepresentations,editmeta,changelog,renderedFields",
+  "id": "76516",
+  "self": "https://guesty.atlassian.net/rest/api/2/issue/76516",
+  "key": "XT-86",
+  "fields": {
+    "updated": "2020-05-21T12:39:41.256+0000"
+  }
+},
+*/
+
+router.get("/jira/:date", function(req, res, next) {  
+  const hours = getMonthJira(req.params.date);
+  
+  res.send(hours);
+});
+
+router.get("/jira", function(req, res, next) {
+  let month = {};
+
+  var d = new Date();
+  var m = d.getMonth();
+  var current_month = m+1;
+  var current_year = d.getFullYear();
+  var counter = 0;
+
+  //currect year
+  for (var i=current_month; i>0; i--) {
+    counter++;
+    var month_number = transalteMonth(i);
+    month[current_year+"-"+month_number] = getMonthJira(current_year+"-"+month_number);
+  }
+
+  //pre year gap
+  for (var j=12; j>12-counter; j--) {
+    var month_number = transalteMonth(j);
+    month[(current_year-1)+"-"+month_number] = getMonthJira((current_year-1)+"-"+month_number);
+  }
+
+  res.send(month);
+});
+
+function transalteMonth(m) {
+  if (m<10) {
+    return "0"+m;
+  } else {
+    return ""+m;
+  }
+}
+
+function getMonthJira(year_month) {
+  var any = 0;
+  var filteredResults = jira.filter((item)=>item.fields.updated.indexOf(year_month)===0);
+  
+  const hours = new Array(24);
+  hours.fill(0);
+  
+  filteredResults.forEach((result)=>{
+    var d = new Date(result.fields.updated);
+    var n = d.getHours();
+    hours[n]++;
+    any++;
+  });
+
+  return any ? hours: null;
+}
 
 module.exports = router;
 
