@@ -171,7 +171,7 @@ router.get("/jira", function(req, res, next) {
   var current_year = d.getFullYear();
   var counter = 0;
 
-  //currect year
+  //current year
   for (var i=current_month; i>0; i--) {
     counter++;
     var month_number = transalteMonth(i);
@@ -185,6 +185,26 @@ router.get("/jira", function(req, res, next) {
   }
 
   res.send(month);
+});
+
+router.get("/jira-month", function(req, res, next) {
+  let data = {};
+
+  var d = new Date();
+  var start_year = 2017;
+  var end_year = d.getFullYear();
+
+  for (var year = start_year; year<= end_year; year++) {
+    for (var month = 1; month <= 12; month ++) {
+      var month_number = transalteMonth(month);
+      var filteredResults = jira.filter((item)=>item.fields.updated.indexOf(year+"-"+month_number)===0);
+      if (filteredResults.length) {
+        data[year+"-"+month_number] = filteredResults.length;
+      }
+    }
+  }
+
+  res.send(data);
 });
 
 function transalteMonth(m) {

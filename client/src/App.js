@@ -19,6 +19,10 @@ fetch("http://localhost:9000/data/jira/2020-05")
   .then(res => console.log(JSON.parse(res)));
 */
 
+fetch("http://localhost:9000/data/jira-month")
+  .then(res => res.text())
+  .then(res => console.log(JSON.parse(res)));
+
 /*
 fetch("https://guesty.atlassian.net/rest/api/2/search?jql=&fields=updated&maxResults=100&startAt=50")
   .then(res => res.text())
