@@ -4,6 +4,7 @@ const https = require('https');
 const http = require('http');
 var secret = require('../../secret');
 var jira = require('../jira.json');
+var git = require('../git.json');
 
 router.get("/repos", function(req, res, next) {
   const options = {
@@ -141,6 +142,10 @@ router.get("/weekly", function(req, res, next) {
     console.log("Error: " + err.message);
   });
 
+});
+
+router.get("/trend", function(req, res, next) {
+  res.send(git);
 });
 
 /*

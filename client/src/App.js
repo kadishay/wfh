@@ -86,7 +86,17 @@ function App() {
   const [jiraAVG, setJiraAVG] = useState({});
   const [jiraUsers, setJiraUsers] = useState([]);
 
+  const [gitTrend, setGitTrend] = useState([]);
+
   const [tooltip, setTooltip] = useState(false);
+
+  useEffect(() => {
+    fetch("http://localhost:9000/data/trend")
+      .then(res => res.text())
+      .then(res => {
+        setGitTrend(res);
+      });
+  },[]);
 
   useEffect(() => {
     fetch("http://localhost:9000/data/hourly")
