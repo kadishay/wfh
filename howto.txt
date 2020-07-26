@@ -9,3 +9,10 @@ https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#we
 https://developer.github.com/v3/repos/statistics/
 
 https://uber.github.io/react-vis/examples/showcases/plots
+
+
+
+
+Dashboards:
+https://colorlib.com/wp/react-dashboard-templates/
+https://madewithreactjs.com/dashboards

@@ -29,7 +29,7 @@ httpGetAsync(
 
 function makeCall() {
     httpGetAsync(
-        "https://guesty.atlassian.net/rest/api/2/search?jql=&fields=updated&maxResults=100&startAt="+(curr_iteration*100),
+        "https://guesty.atlassian.net/rest/api/2/search?jql=&fields=updated,assignee&maxResults=100&startAt="+(curr_iteration*100),
         function(resp){
             issues = issues.concat(JSON.parse(resp).issues);
         }
@@ -45,4 +45,4 @@ function testEnd(){
         setTimeout(testEnd,1000);
     }
 }
-testEnd();
+setTimeout(testEnd,3000);

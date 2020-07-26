@@ -33,18 +33,18 @@ fetch("https://guesty.atlassian.net/rest/api/2/search?jql=&fields=updated&maxRes
 */
 
 var colors = {
-  "01": "AliceBlue",
-  "02": "AntiqueWhite",
-  "03": "Aqua",
-  "04": "Aquamarine",
-  "05": "Azure",
-  "06": "Beige",
-  "07": "BurlyWood",
-  "08": "CornflowerBlue",
-  "09": "CadetBlue",
-  "10": "Cornsilk",
-  "11": "DarkCyan",
-  "12": "DarkSeaGreen"
+  "01": "blue",
+  "02": "blue",
+  "03": "yellow",
+  "04": "red",
+  "05": "red",
+  "06": "red",
+  "07": "red",
+  "08": "red",
+  "09": "blue",
+  "10": "blue",
+  "11": "blue",
+  "12": "blue"
 }
 
 function colorMap(month) {
