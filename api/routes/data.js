@@ -230,7 +230,7 @@ router.get("/jira-users", function(req, res, next) {
 
   jira.forEach(item=>{
     year = new Date (item.fields.updated).getWeekYear();
-    week = transalteMonth(new Date (item.fields.updated).getWeek() + 1);
+    week = transalteMonth(new Date (item.fields.updated).getWeek());
     if(!data[year+"-"+week]) {
       data[year+"-"+week] = {
         contributers : {}

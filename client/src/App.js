@@ -201,7 +201,6 @@ function App() {
           });
         });
         users_chart = users_chart.sort(compare);
-        console.log(users_chart);
         setJiraUsers(users_chart);
       });
   },[]);
