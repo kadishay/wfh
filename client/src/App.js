@@ -265,7 +265,25 @@ function App() {
           
         </XYPlot>
 
-        <h2>Jira Per Hour last 12M</h2>
+        <h2>Jira Weekly Unique Users</h2>
+        <XYPlot 
+          onMouseLeave={() => {setTooltip(false)}}
+          
+          xType="ordinal"
+          width={800}
+          height={600}>
+          <HorizontalGridLines />
+          <LineSeries
+            data={jiraUsers}
+            onNearestXY={(datapoint, event)=>{
+              setTooltip(datapoint);
+            }}/>
+          <XAxis tickLabelAngle={90} />
+          <YAxis />
+          {tooltip ? <Hint value={tooltip} /> : null}
+        </XYPlot>
+
+        <h2>Jira Update Per Hour last 12M</h2>
         <XYPlot width={800} height={600}>
           <HorizontalGridLines />
           <XAxis />
@@ -284,24 +302,6 @@ function App() {
                 />
           )
           })}
-        </XYPlot>
-
-        <h2>Jira Weekly unique users</h2>
-        <XYPlot 
-          onMouseLeave={() => {setTooltip(false)}}
-          
-          xType="ordinal"
-          width={800}
-          height={600}>
-          <HorizontalGridLines />
-          <LineSeries
-            data={jiraUsers}
-            onNearestXY={(datapoint, event)=>{
-              setTooltip(datapoint);
-            }}/>
-          <XAxis tickLabelAngle={90} />
-          <YAxis />
-          {tooltip ? <Hint value={tooltip} /> : null}
         </XYPlot>
 
         <h2>Git commits by hour of the day - last 20k commits</h2>

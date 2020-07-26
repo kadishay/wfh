@@ -46,3 +46,7 @@ function testEnd(){
     }
 }
 setTimeout(testEnd,3000);
+
+/**
+ * clean support tickets
+ */
