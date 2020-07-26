@@ -61,6 +61,19 @@ function colorMap(month) {
   return colors[month];
 }
 
+// Returns the ISO week of the date.
+Date.prototype.getWeek = function() {
+  var date = new Date(this.getTime());
+  date.setHours(0, 0, 0, 0);
+  // Thursday in current week decides the year.
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  // January 4 is always in week 1.
+  var week1 = new Date(date.getFullYear(), 0, 4);
+  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+                        - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
 function App() {
   var d = new Date();
   var n = d.getMonth();
@@ -99,6 +112,9 @@ function App() {
 
         var weeks_chart = JSON.parse(res).weeks.map((num,i)=>({
           x:52-i,
+          week: (currentWeekNumber - (52 - i) + 1 > 0) ? 
+            ((i-(52-currentWeekNumber)+1) + "-"+new Date().getFullYear()) : 
+            ( currentWeekNumber + i + 1) + "-" + (new Date().getFullYear()-1),
           y:num
         }));
         setWeeks(weeks_chart);
@@ -301,16 +317,21 @@ function App() {
 
         <h2>Git commits by week 0 is current - going back 1 year - 52 weeks - with 6m running average </h2>
         <XYPlot
+          onMouseLeave={() => {setTooltip(false)}}
           width={800}
           height={600}>
           <HorizontalGridLines />
           <LineSeries
-            data={weeks}/>
+            data={weeks}
+            onNearestXY={(datapoint, event)=>{
+              setTooltip(datapoint);
+            }}/>
           <LineSeries
             curve={'curveMonotoneX'}
             data={weeksAVG}/>
-          <XAxis />
+          <XAxis tickLabelAngle={90} />
           <YAxis />
+          {tooltip ? <Hint value={tooltip} /> : null}
         </XYPlot>
 
         <h2>Git commits by day of the week</h2>
