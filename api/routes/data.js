@@ -146,14 +146,29 @@ router.get("/weekly", function(req, res, next) {
 /*
 
 {
-  "expand": "operations,versionedRepresentations,editmeta,changelog,renderedFields",
-  "id": "76516",
-  "self": "https://guesty.atlassian.net/rest/api/2/issue/76516",
-  "key": "XT-86",
-  "fields": {
-    "updated": "2020-05-21T12:39:41.256+0000"
-  }
-},
+      "expand": "operations,versionedRepresentations,editmeta,changelog,renderedFields",
+      "id": "61025",
+      "self": "https://guesty.atlassian.net/rest/api/2/issue/61025",
+      "key": "ACC-13",
+      "fields": {
+        "updated": "2020-03-26T12:41:08.195+0000",
+        "assignee": {
+          "self": "https://guesty.atlassian.net/rest/api/2/user?accountId=5c98ee60beb7ed09e701402f",
+          "accountId": "5c98ee60beb7ed09e701402f",
+          "emailAddress": "X@guesty.com",
+          "avatarUrls": {
+            "48x48": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5c98ee60beb7ed09e701402f/3fc11cdc-136d-49f9-9084-cbd4805748b8/48",
+            "24x24": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5c98ee60beb7ed09e701402f/3fc11cdc-136d-49f9-9084-cbd4805748b8/24",
+            "16x16": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5c98ee60beb7ed09e701402f/3fc11cdc-136d-49f9-9084-cbd4805748b8/16",
+            "32x32": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5c98ee60beb7ed09e701402f/3fc11cdc-136d-49f9-9084-cbd4805748b8/32"
+          },
+          "displayName": "X Y",
+          "active": true,
+          "timeZone": "Etc/GMT",
+          "accountType": "atlassian"
+        }
+      }
+    },
 */
 
 router.get("/jira/:date", function(req, res, next) {  
@@ -207,6 +222,35 @@ router.get("/jira-month", function(req, res, next) {
   res.send(data);
 });
 
+router.get("/jira-users", function(req, res, next) {
+  var data = {};
+  var result = {};
+
+  var year, week;
+
+  jira.forEach(item=>{
+    year = new Date (item.fields.updated).getWeekYear();
+    week = transalteMonth(new Date (item.fields.updated).getWeek() + 1);
+    if(!data[year+"-"+week]) {
+      data[year+"-"+week] = {
+        contributers : {}
+      };
+    }
+    var user = (item.fields && item.fields.assignee) ?  item.fields.assignee.emailAddress : null;
+
+    if(user) {
+      data[year+"-"+week].contributers[user] = true;
+    }
+    
+  });
+
+  Object.keys(data).forEach(week=>{
+    result[week] = Object.keys(data[week].contributers).length;
+  });
+
+  res.send(result);
+});
+
 function transalteMonth(m) {
   if (m<10) {
     return "0"+m;
@@ -230,6 +274,26 @@ function getMonthJira(year_month) {
   });
 
   return any ? hours: null;
+}
+
+// Returns the ISO week of the date.
+Date.prototype.getWeek = function() {
+  var date = new Date(this.getTime());
+  date.setHours(0, 0, 0, 0);
+  // Thursday in current week decides the year.
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  // January 4 is always in week 1.
+  var week1 = new Date(date.getFullYear(), 0, 4);
+  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+                        - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+// Returns the four-digit year corresponding to the ISO week of the date.
+Date.prototype.getWeekYear = function() {
+  var date = new Date(this.getTime());
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  return date.getFullYear();
 }
 
 module.exports = router;

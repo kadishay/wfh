@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import './App.css';
-import {XYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries, LineMarkSeries} from 'react-vis';
+import {XYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries, LineMarkSeries, Hint, MarkSeriesCanvas} from 'react-vis';
 
 Date.prototype.getWeek = function() {
   var onejan = new Date(this.getFullYear(), 0, 1);
@@ -19,7 +19,7 @@ fetch("http://localhost:9000/data/jira/2020-05")
   .then(res => console.log(JSON.parse(res)));
 */
 
-fetch("http://localhost:9000/data/jira-month")
+fetch("http://localhost:9000/data/jira-users")
   .then(res => res.text())
   .then(res => console.log(JSON.parse(res)));
 
@@ -31,6 +31,16 @@ fetch("https://guesty.atlassian.net/rest/api/2/search?jql=&fields=updated&maxRes
     console.log(JSON.parse(res))
   });
 */
+
+function compare( a, b ) {
+  if ( b.x < a.x ){
+    return -1;
+  }
+  if ( b.x > a.x ){
+    return 1;
+  }
+  return 0;
+}
 
 var colors = {
   "01": "blue",
@@ -61,6 +71,9 @@ function App() {
   const [weeksAVG, setWeeksAVG] = useState([]);
   const [jira, setJira] = useState({});
   const [jiraAVG, setJiraAVG] = useState({});
+  const [jiraUsers, setJiraUsers] = useState([]);
+
+  const [tooltip, setTooltip] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:9000/data/hourly")
@@ -174,6 +187,24 @@ function App() {
         setJiraAVG(month_hours_avg_chart);
       });
   },[]);
+
+  useEffect(() => {
+    fetch("http://localhost:9000/data/jira-users")
+      .then(res => res.text())
+      .then(res => {
+        var users_chart = [];
+        var result = JSON.parse(res);
+        Object.keys(result).forEach((key,i)=>{
+          users_chart.push({
+            x:key,
+            y:parseInt(result[key])
+          });
+        });
+        users_chart = users_chart.sort(compare);
+        console.log(users_chart);
+        setJiraUsers(users_chart);
+      });
+  },[]);
   
   var sum_weeks = 0;
   var sum_days = 0;
@@ -238,6 +269,24 @@ function App() {
                 />
           )
           })}
+        </XYPlot>
+
+        <h2>Jira Weekly unique users</h2>
+        <XYPlot 
+          onMouseLeave={() => {setTooltip(false)}}
+          
+          xType="ordinal"
+          width={800}
+          height={600}>
+          <HorizontalGridLines />
+          <LineSeries
+            data={jiraUsers}
+            onNearestXY={(datapoint, event)=>{
+              setTooltip(datapoint);
+            }}/>
+          <XAxis />
+          <YAxis />
+          {tooltip ? <Hint value={tooltip} /> : null}
         </XYPlot>
 
         <h2>Git commits by hour of the day - last 20k commits</h2>
