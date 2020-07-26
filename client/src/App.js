@@ -283,7 +283,7 @@ function App() {
             onNearestXY={(datapoint, event)=>{
               setTooltip(datapoint);
             }}/>
-          <XAxis />
+          <XAxis tickLabelAngle={90} />
           <YAxis />
           {tooltip ? <Hint value={tooltip} /> : null}
         </XYPlot>
@@ -315,12 +315,12 @@ function App() {
 
         <h2>Git commits by day of the week</h2>
         <XYPlot
-          width={300}
-          height={300}>
+          width={800}
+          height={600}>
           <HorizontalGridLines />
           <LineSeries
             data={days}/>
-          <XAxis />
+          <XAxis tickValues={[1, 2, 3, 4,5,6,7]} tickFormat={v => Math.round(v)}/>
           <YAxis />
         </XYPlot>
 
