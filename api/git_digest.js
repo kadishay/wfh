@@ -1,21 +1,67 @@
+const jsonX = require('./test.json'); //partial for testing
 const json1 = require('./test2.json');
 const json2 = require('./test3.json');
 const fs = require('fs');
 
 var json = json1.concat(json2);
 
+
 console.log(json.length);
 var agg = {};
+var agg_personal = {};
+var users = {};
 json.forEach(commit => {
     var date = new Date(commit.commit.author.date);
     var year = date.getFullYear();
     var month = transalteNum(date.getMonth() + 1);
     var hour = transalteNum(date.getHours());
+    
+    //non personal
     if (!agg[year+"-"+month+"-"+hour]) {
         agg[year+"-"+month+"-"+hour] = 0;
     }
     agg[year+"-"+month+"-"+hour]++;
+    
+    //personal
+    if (year === 2020 && month > 3) {
+        var user = commit.commit.author.name;
+        if (!agg_personal[year+"-"+month+"-"+hour]) {
+            agg_personal[year+"-"+month+"-"+hour] = {};
+        }
+        if (!agg_personal[year+"-"+month+"-"+hour][user]) {
+            agg_personal[year+"-"+month+"-"+hour][user] = 0;
+        }
+        agg_personal[year+"-"+month+"-"+hour][user]++;
+    }
+   
 });
+
+/**
+ * Personal
+ */
+
+Object.keys(agg_personal).forEach(time=>{
+    Object.keys(agg_personal[time]).forEach(person=>{
+        if (!users[person]) {
+            users[person] = {};
+        }
+        
+        var hour = parseInt(time.split("-")[2]);
+        if (!users[person][hour]) {
+            users[person][hour] = 0;
+        }
+        users[person][hour] += agg_personal[time][person];
+        
+    });
+});
+console.log(users);
+fs.writeFile("personal_git.json", JSON.stringify(users), function(err) {
+    if(err) {
+        return console.log(err);
+    }
+    console.log("The file was saved! - personal data");
+});
+
 
 
 //fill in gaps with 00
@@ -31,44 +77,50 @@ for (var y = 2016; y <= 2020; y++) {
     }
 }
 
+
 // percentage
 for (var y = 2016; y <= 2020; y++) {
     for (var m = 1; m <= 12; m++) {
         var monthTotal = 0;
-        for (var h = 0; h<= 23; h++) {
-            if (agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)]) {
-                monthTotal += agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)];
+        if (y === 2020 && m > 7) {
+            //skip
+        } else {
+            for (var h = 0; h<= 23; h++) {
+                if (agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)]) {
+                    monthTotal += agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)];
+                }
             }
-        }
-        for (var h = 0; h<= 23; h++) {
-            if (agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)]) {
-                agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)] = Math.round(agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)] / monthTotal * 10000)/100;
+            for (var h = 0; h<= 23; h++) {
+                if (agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)]) {
+                    agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)] = Math.round(agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)] / monthTotal * 10000)/100;
+                }
             }
         }
     }
 }
 
-
 var result = {};
-
 
 for (var y = 2018; y <= 2020; y++) {
     for (var m = 1; m <= 12; m++) {
         for (var h = 0; h<= 23; h++) {
-            if (!result[y+"-"+transalteNum(m)]) {
-                result[y+"-"+transalteNum(m)] = [];
+            if (y === 2020 && m > 7) {
+                //skip
+            } else {
+                if (!result[y+"-"+transalteNum(m)]) {
+                    result[y+"-"+transalteNum(m)] = [];
+                }
+                result[y+"-"+transalteNum(m)].push({
+                    x : y+"-"+transalteNum(m)+"-"+transalteNum(h),
+                    y : agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)] || 0
+                });
             }
-            result[y+"-"+transalteNum(m)].push({
-                x : y+"-"+transalteNum(m)+"-"+transalteNum(h),
-                y : agg[y+"-"+transalteNum(m)+"-"+transalteNum(h)]
-            });
         }
     }
 }
 
 
-
-console.log(result);
+//console.log(result);
 
 fs.writeFile("git.json", JSON.stringify(result), function(err) {
     if(err) {
@@ -84,7 +136,6 @@ function transalteNum(n) {
         return ""+n;
     }
 }
-
 
 
 /*

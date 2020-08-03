@@ -163,10 +163,12 @@ function App() {
         var month_hours_chart = {};
         var result = JSON.parse(res);
         Object.keys(result).forEach((key) => {
-          month_hours_chart[key] = result[key].map((num,i)=>({
-            x:i+1,
-            y:num
-          }));
+          if (result[key]) {
+            month_hours_chart[key] = result[key].map((num,i)=>({
+              x:i+1,
+              y:num
+            }));
+          }
         });
 
         setJira(month_hours_chart);
